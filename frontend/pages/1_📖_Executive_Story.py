@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
@@ -62,6 +63,7 @@ with col_left:
         y0=9.0, y1=9.0, line=dict(color="#d32f2f", width=2, dash="dash")
     )
     
+    # FIXED: Defined clean autoscale chart parameters without trailing argument syntax breaks
     fig.update_layout(
         title="Scenario Iteration Path Over Time vs 9% Hurdle Rate",
         xaxis_title="Commit Timestamp Timeline",
