@@ -40,11 +40,10 @@ else:
     # First filter down to selected entities
     filtered_df = base_company_df[base_company_df["Hyperscaler Entity"].isin(selected_companies)].copy()
     
-    # Isolate entities currently underperforming the safety hurdle threshold
-    failing_entities_df = filtered_df[filtered_df["Isolated Operating Return (%)"] = target_hurdle:
+    # FIX: Corrected comparison expression (= target_hurdle:
             years_needed = 0
         elif growth_rate <= 0:
-            years_needed = float('inf') # Will never reach target if growth is flat or negative
+            years_needed = float('inf') 
         else:
             years_needed = (target_hurdle - current_return) / growth_rate
             
@@ -58,4 +57,6 @@ else:
         })
     
     projection_df = pd.DataFrame(projection_records)
-    st.dataframe(projection_df, hide_index=True, use_container_width=True)
+    
+    # FIX: Changed use_container_width=True to width="stretch"
+    st.dataframe(projection_df, hide_index=True, width="stretch")
