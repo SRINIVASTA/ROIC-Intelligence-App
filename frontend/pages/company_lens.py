@@ -30,9 +30,9 @@ else:
         active_capex, active_roic, active_scenario = 357.5, 29.7, "Default Baseline"
         r_msft, r_gcp, r_aws, r_meta = 32.4, 28.1, 31.0, 24.5
 
-    st.info(f"📊 Active Pipeline Context: **{active_scenario}** (Capex: ${active_capex}B, Baseline ROIC: {active_roic}%)")
+    st.info(f"Active Pipeline Context: **{active_scenario}** (Capex: ${active_capex}B, Baseline ROIC: {active_roic}%)")
 
-    # Master Entity Matrix holding all 15 companies from the CBS PDF stack (Pre-arranged from largest scale to smallest)
+    # Master Entity Matrix holding all 15 companies from the CBS PDF stack
     master_registry_df = pd.DataFrame({
         "Company / Cluster Entity": [
             "Microsoft (Azure)", "Alphabet (GCP)", "Amazon (AWS)", "Meta Infrastructure", "Oracle Cloud", "Alibaba Group",
@@ -90,16 +90,24 @@ else:
     if not selected_entities:
         st.warning("Please choose at least one enterprise entity to calculate data summaries.")
     else:
-        # Filter down rows to selections
+        # 1. Filter down rows based on user multi-select choice first
         filtered_df = master_registry_df[master_registry_df["Company / Cluster Entity"].isin(selected_entities)].copy()
         
-        # SUCCESSFUL SORT FIX: Sort values from Largest Spend to Smallest Spend immediately
-        filtered_df = filtered_df.sort_values(by="Allocated Capex Intensity ($B)", ascending=False)
-        
+        # 2. Extract failing slice safely using index references
         failing_entities_df = filtered_df[filtered_df["Isolated Operating Return (%)"] < target_hurdle]
-        display_df = failing_entities_df if isolate_failing else filtered_df
         
-        st.dataframe(display_df, hide_index=True, width="stretch")
+        # 3. Dynamic Toggle Selection Layout Block
+        if isolate_failing:
+            display_df = failing_entities_df.copy()
+        else:
+            display_df = filtered_df.copy()
+            
+        # ✅ ORDER FIX: Apply "Big to Small" sorting rule on the final visible table dataset
+        if not display_df.empty:
+            display_df = display_df.sort_values(by="Allocated Capex Intensity ($B)", ascending=False)
+            st.dataframe(display_df, hide_index=True, width="stretch")
+        else:
+            st.info("🎉 Operational Integrity Verified: No active deficit entities match this hurdle profile!")
         
         # Multi-Year Runway Forecast Calculations
         st.subheader("📈 Runway Forecast and Convergence Metrics")
@@ -120,7 +128,7 @@ else:
             projection_records.append({
                 "Ecosystem Entity": row["Company / Cluster Entity"],
                 "Classification": row["Segment Classification"],
-                "Allocated Capex ($B)": row["Allocated Capex Intensity ($B)"], # Included for sorted pairing tracking
+                "Allocated Capex ($B)": row["Allocated Capex Intensity ($B)"],
                 "Current Return (%)": current_return,
                 "Target Hurdle (%)": target_hurdle,
                 "Estimated Runway (Years)": round(years_needed, 1) if years_needed != float('inf') else "Non-convergent",
@@ -129,20 +137,26 @@ else:
         
         projection_df = pd.DataFrame(projection_records)
         
-        # SUCCESSFUL SORT FIX: Enforce uniform size ranking on the secondary forecasting matrix
-        projection_df = projection_df.sort_values(by="Allocated Capex ($B)", ascending=False)
-        
-        # Inline uniform attention styling engine function
-        def highlight_urgency(val):
-            if val == "Immediate Attention":
-                return 'background-color: #fce8e6; color: #a81c0c; font-weight: bold;'
-            elif val == "Passing":
-                return 'background-color: #e6f4ea; color: #137333; font-weight: bold;'
-            return ''
+        # ✅ TOGGLE SYNC FIX: Dynamically filter secondary forecast metrics to match the layout toggle switch state
+        if isolate_failing:
+            projection_df = projection_df[projection_df["Hurdle Status"] == "Immediate Attention"]
+            
+        if not projection_df.empty:
+            # Sort the forecasting matrix from Big to Small
+            projection_df = projection_df.sort_values(by="Allocated Capex ($B)", ascending=False)
+            
+            def highlight_urgency(val):
+                if val == "Immediate Attention":
+                    return 'background-color: #fce8e6; color: #a81c0c; font-weight: bold;'
+                elif val == "Passing":
+                    return 'background-color: #e6f4ea; color: #137333; font-weight: bold;'
+                return ''
 
-        try:
-            stylized_df = projection_df.style.map(highlight_urgency, subset=["Hurdle Status"])
-        except AttributeError:
-            stylized_df = projection_df.style.applymap(highlight_urgency, subset=["Hurdle Status"])
+            try:
+                stylized_df = projection_df.style.map(highlight_urgency, subset=["Hurdle Status"])
+            except AttributeError:
+                stylized_df = projection_df.style.applymap(highlight_urgency, subset=["Hurdle Status"])
 
-        st.dataframe(stylized_df, hide_index=True, width="stretch")
+            st.dataframe(stylized_df, hide_index=True, width="stretch")
+        else:
+            st.info("No matching records found for active forecasting views.")
