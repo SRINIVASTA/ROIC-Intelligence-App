@@ -40,7 +40,8 @@ else:
     # First filter down to selected entities
     filtered_df = base_company_df[base_company_df["Hyperscaler Entity"].isin(selected_companies)].copy()
     
-    # FIX: Corrected comparison expression (= target_hurdle:
+    # Calculate filtered frames cleanly
+    failing_entities_df = filtered_df[filtered_df["Isolated Operating Return (%)"] = target_hurdle:
             years_needed = 0
         elif growth_rate <= 0:
             years_needed = float('inf') 
@@ -57,6 +58,4 @@ else:
         })
     
     projection_df = pd.DataFrame(projection_records)
-    
-    # FIX: Changed use_container_width=True to width="stretch"
     st.dataframe(projection_df, hide_index=True, width="stretch")
