@@ -47,7 +47,13 @@ with tab_standard:
         if st.form_submit_button("Commit Transaction to Lakehouse"):
             fc = float(st.session_state.parsed_capex) if st.session_state.parsed_capex is not None else round(357.5 * multiplier, 1)
             fr = float(st.session_state.parsed_roic) if st.session_state.parsed_roic is not None else round(29.7 + shift, 1)
-            conn.execute("INSERT INTO gold_roic_ledger VALUES (?, ?, ?, ?, ?, ?, ?)", (label, fc, fr, round(fr+2.7, 1), round(fr-1.6, 1), round(fr+1.3, 1), round(fr-5.2, 1)))
+            
+            # FIXED: Explicit column targets defined so DuckDB can auto-generate the timestamp cleanly
+            conn.execute("""
+                INSERT INTO gold_roic_ledger (scenario_name, capex_billion, roic_percent, msft_roic, gcp_roic, aws_roic, meta_roic) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (label, fc, fr, round(fr+2.7, 1), round(fr-1.6, 1), round(fr+1.3, 1), round(fr-5.2, 1)))
+            
             st.session_state.parsed_capex, st.session_state.parsed_roic = None, None
             st.success(f"Successfully committed transaction: '{label}' into Gold ledger tables!")
             st.rerun()
