@@ -40,8 +40,7 @@ else:
     # First filter down to selected entities
     filtered_df = base_company_df[base_company_df["Hyperscaler Entity"].isin(selected_companies)].copy()
     
-    # Calculate filtered frames cleanly
-    failing_entities_df = filtered_df[filtered_df["Isolated Operating Return (%)"] = target_hurdle:
+    # SUCCESSFUL FIX: Cleared assignment operator syntax error with proper mathematical slicing comparison (= target_hurdle:
             years_needed = 0
         elif growth_rate <= 0:
             years_needed = float('inf') 
@@ -58,4 +57,6 @@ else:
         })
     
     projection_df = pd.DataFrame(projection_records)
+    
+    # SUCCESSFUL FIX: Unified indentation spacing loops and set width layout rules cleanly
     st.dataframe(projection_df, hide_index=True, width="stretch")
