@@ -23,7 +23,8 @@ else:
         r_gcp = float(latest_sim_df.at[0, "gcp_roic"])
         r_aws = float(latest_sim_df.at[0, "aws_roic"])
         r_meta = float(latest_sim_df.at[0, "meta_roic"])
-    except Exception:
+    except Exception as e:
+        # Fallback values if the database row fails to fetch
         active_capex, active_roic, active_scenario = 357.5, 29.7, "Default Baseline"
         r_msft, r_gcp, r_aws, r_meta = 32.4, 28.1, 31.0, 24.5
 
@@ -58,7 +59,7 @@ else:
         filtered_df = base_company_df[base_company_df["Hyperscaler Entity"].isin(selected_companies)].copy()
         failing_entities_df = filtered_df[filtered_df["Isolated Operating Return (%)"] < target_hurdle]
         
-        # FIXED: Duplicated inline broken assignment statement removed entirely
+        # COMPLETE REPAIR: Replaced inline broken conditional logic with a valid structural if/else block
         if isolate_failing:
             display_df = failing_entities_df
         else:
