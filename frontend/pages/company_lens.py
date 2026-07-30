@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 from data_pipeline.transform_gold import calculate_lens_metrics
 
-
 # Force clear background layout cache memory configurations on load
 st.cache_data.clear()
 
@@ -34,7 +33,7 @@ else:
 
     st.info(f"Active Pipeline Context: **{active_scenario}** (Capex: ${active_capex}B, Baseline ROIC: {active_roic}%)")
 
-    # Master Entity Matrix holding all 15 companies from the CBS PDF stack
+    # Cleaned Matrix: Offloaded hardcoded math layers to calculate_lens_metrics in data pipeline
     master_registry_df = pd.DataFrame({
         "Company / Cluster Entity": [
             "Microsoft (Azure)", "Alphabet (GCP)", "Amazon (AWS)", "Meta Infrastructure", "Oracle Cloud", "Alibaba Group",
@@ -54,10 +53,14 @@ else:
             round(active_capex * 0.005, 1), round(active_capex * 0.003, 1), round(active_capex * 0.002, 1)
         ],
         "Isolated Operating Return (%)": [
-            r_msft, r_gcp, r_aws, r_meta, round(active_roic - 1.2, 1), round(active_roic - 3.4, 1),
-            round(active_roic - 6.2, 1), round(active_roic - 5.8, 1), round(active_roic - 4.1, 1),
-            round(active_roic + 14.8, 1), round(active_roic - 7.3, 1), round(active_roic - 6.5, 1), 
-            round(active_roic - 7.0, 1), round(active_roic - 8.4, 1), round(active_roic - 9.1, 1)
+            calculate_lens_metrics(r_msft, 100.0), calculate_lens_metrics(r_gcp, 100.0), 
+            calculate_lens_metrics(r_aws, 100.0), calculate_lens_metrics(r_meta, 100.0), 
+            calculate_lens_metrics(active_roic - 1.2, 100.0), calculate_lens_metrics(active_roic - 3.4, 100.0),
+            calculate_lens_metrics(active_roic - 6.2, 100.0), calculate_lens_metrics(active_roic - 5.8, 100.0), 
+            calculate_lens_metrics(active_roic - 4.1, 100.0), calculate_lens_metrics(active_roic + 14.8, 100.0), 
+            calculate_lens_metrics(active_roic - 7.3, 100.0), calculate_lens_metrics(active_roic - 6.5, 100.0), 
+            calculate_lens_metrics(active_roic - 7.0, 100.0), calculate_lens_metrics(active_roic - 8.4, 100.0), 
+            calculate_lens_metrics(active_roic - 9.1, 100.0)
         ],
         "Historical Return Growth (pp/yr)": [
             1.5, 0.8, 1.2, 2.1, 1.7, 0.5,
@@ -77,8 +80,6 @@ else:
 
     st.subheader("🔍 Isolate Ecosystem Players")
     all_entities = master_registry_df["Company / Cluster Entity"].tolist()
-    
-    # Default selection setup
     default_selections = ["Microsoft (Azure)", "Alphabet (GCP)", "Amazon (AWS)", "Meta Infrastructure"]
     
     selected_entities = st.multiselect(
@@ -92,26 +93,20 @@ else:
     if not selected_entities:
         st.warning("Please choose at least one enterprise entity to calculate data summaries.")
     else:
-        # 1. Filter down rows based on user multi-select choice first
         filtered_df = master_registry_df[master_registry_df["Company / Cluster Entity"].isin(selected_entities)].copy()
-        
-        # 2. Extract failing slice safely using index references
         failing_entities_df = filtered_df[filtered_df["Isolated Operating Return (%)"] < target_hurdle]
         
-        # 3. Dynamic Toggle Selection Layout Block
         if isolate_failing:
             display_df = failing_entities_df.copy()
         else:
             display_df = filtered_df.copy()
             
-        # ✅ ORDER FIX: Apply "Big to Small" sorting rule on the final visible table dataset
         if not display_df.empty:
             display_df = display_df.sort_values(by="Allocated Capex Intensity ($B)", ascending=False)
             st.dataframe(display_df, hide_index=True, width="stretch")
         else:
             st.info("🎉 Operational Integrity Verified: No active deficit entities match this hurdle profile!")
         
-        # Multi-Year Runway Forecast Calculations
         st.subheader("📈 Runway Forecast and Convergence Metrics")
         st.markdown("Projects the total calendar timeline (runway years) needed to pass the safety threshold based on current growth trajectories.")
         
@@ -139,26 +134,9 @@ else:
         
         projection_df = pd.DataFrame(projection_records)
         
-        # ✅ TOGGLE SYNC FIX: Dynamically filter secondary forecast metrics to match the layout toggle switch state
         if isolate_failing:
             projection_df = projection_df[projection_df["Hurdle Status"] == "Immediate Attention"]
             
         if not projection_df.empty:
-            # Sort the forecasting matrix from Big to Small
             projection_df = projection_df.sort_values(by="Allocated Capex ($B)", ascending=False)
-            
-            def highlight_urgency(val):
-                if val == "Immediate Attention":
-                    return 'background-color: #fce8e6; color: #a81c0c; font-weight: bold;'
-                elif val == "Passing":
-                    return 'background-color: #e6f4ea; color: #137333; font-weight: bold;'
-                return ''
-
-            try:
-                stylized_df = projection_df.style.map(highlight_urgency, subset=["Hurdle Status"])
-            except AttributeError:
-                stylized_df = projection_df.style.applymap(highlight_urgency, subset=["Hurdle Status"])
-
-            st.dataframe(stylized_df, hide_index=True, width="stretch")
-        else:
-            st.info("No matching records found for active forecasting views.")
+            st.dataframe(projection_df, hide_index=True, width="stretch")
