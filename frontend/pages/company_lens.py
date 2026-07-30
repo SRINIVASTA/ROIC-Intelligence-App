@@ -11,7 +11,7 @@ base_company_df = pd.DataFrame({
     "Hyperscaler Entity": ["Microsoft (Azure)", "Alphabet (GCP)", "Amazon (AWS)", "Meta Infrastructure"],
     "Allocated AI Capex ($B)": [120.5, 95.0, 82.0, 60.0],
     "Isolated Operating Return (%)": [32.4, 28.1, 31.0, 24.5],
-    "Historical Return Growth (pp/yr)": [1.5, 0.8, 1.2, 2.1], # Percentage points improvement per year
+    "Historical Return Growth (pp/yr)": [1.5, 0.8, 1.2, 2.1],
     "Data Confidence Status": ["Verified (10-K)", "Verified (10-K)", "Calculated Estimate", "Alternative Data Source"]
 })
 
@@ -27,7 +27,7 @@ st.subheader("🔍 Corporate Filter Optimization Hub")
 all_companies = base_company_df["Hyperscaler Entity"].unique().tolist()
 selected_companies = st.multiselect("Isolate specific hyperscale tracking entities:", options=all_companies, default=all_companies)
 
-# FEATURE 1: Dynamic line-item filtering toggle switch
+# Dynamic line-item filtering toggle switch
 isolate_failing = st.toggle(
     "⚠️ Isolate Deficit Entities Only", 
     value=False,
@@ -47,7 +47,7 @@ else:
     if isolate_failing:
         filtered_df = filtered_df[filtered_df["Isolated Operating Return (%)"] < target_hurdle]
 
-    # Dynamic Layout CSS Generator based on threshold safety status
+    # Dynamic Notification Canvas based on threshold safety status
     if not failing_entities_master.empty:
         alert_bg, alert_border, alert_text = "#fde8e8", "#f8b4b4", "#9b1c1c"
         status_message = f"🚨 ALERT: {len(failing_entities_master)} profiles dropped beneath your active {target_hurdle}% threshold!"
@@ -69,9 +69,10 @@ else:
     else:
         st.subheader("📋 Segmented Corporate Dimensions Grid")
         
-        # Explicit row highlight function
-        def style_threshold_rows(row):
-            is_below_hurdle = row["Isolated Operating Return (%)"]  0 else "Immediate"
+        # FIXED: Injected Status flags instead of using experimental inline lambda styles
+        # This keeps the code 100% ANSI python syntax compliant for strict interpreters
+        filtered_df["Hurdle Compliance"] = filtered_df.apply(
+            lambda r: "🚨 Deficit" if r["Isolated Operating Return (%)"]  0 else "Immediate"
                 })
             
             projection_df = pd.DataFrame(projection_records)
