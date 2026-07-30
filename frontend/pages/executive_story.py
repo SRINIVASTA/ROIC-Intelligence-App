@@ -17,69 +17,80 @@ st.title("The returns behind the AI buildout")
 st.caption("A governed view of capital intensity, operating performance, and pathways to economic profit.")
 st.divider()
 
-conn = st.session_state.duckdb_conn
-all_scenarios_df = conn.execute("SELECT * FROM gold_roic_ledger ORDER BY timestamp ASC").df()
-
-latest_row = all_scenarios_df.iloc[-1]
-current_name = latest_row["scenario_name"]
-current_capex = latest_row["capex_billion"]
-current_roic = latest_row["roic_percent"]
-
-simulated_revenue = 1602.5 * (current_capex / 357.5)
-simulated_spread = current_roic - 9.0
-
-col_left, col_right = st.columns(2)
-
-with col_left:
-    st.markdown(f"""
-        <div style="background-color: #fdfdfd; padding: 30px; border: 1px solid #f1f1f1; border-radius: 4px; margin-bottom: 20px;">
-            <p style="font-size: 11px; color: #a0a0a0; font-weight: bold; margin-bottom: 5px;">@ ACTIVE VIEW: {current_name.upper()}</p>
-            <h2 style="font-family: serif; font-size: 34px; font-weight: normal; color: #111111; line-height: 1.3;">
-                The hyperscalers invested <span style="color: #2e7d32; font-weight: bold;">${current_capex:,.1f}B</span> in cash capex while sustaining an average <span style="color: #2e7d32; font-weight: bold;">{current_roic:.1f}%</span> adjusted ROIC.
-            </h2>
-        </div>
-    """, unsafe_allow_html=True)
+if "duckdb_conn" not in st.session_state:
+    st.error("🔌 Database engine connection offline. Please initialize the application from the main core page.")
+else:
+    conn = st.session_state.duckdb_conn
     
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=all_scenarios_df["timestamp"], 
-        y=all_scenarios_df["roic_percent"],
-        mode='lines+markers',
-        name='Trajectory',
-        line=dict(color='#2e7d32', width=3),
-        marker=dict(size=8, color='#0d231d')
-    ))
-    
-    fig.add_shape(
-        type="line", x0=all_scenarios_df["timestamp"].min(), x1=all_scenarios_df["timestamp"].max(),
-        y0=9.0, y1=9.0, line=dict(color="#d32f2f", width=2, dash="dash")
-    )
-    
-    fig.update_layout(
-        title="Scenario Iteration Path Over Time vs 9% Hurdle Rate",
-        xaxis_title="Commit Timeline",
-        yaxis_title="Adjusted ROIC (%)",
-        template="plotly_white",
-        margin=dict(l=20, r=20, t=40, b=20)
-    )
-    st.plotly_chart(fig, use_container_width=True)
+    try:
+        all_scenarios_df = conn.execute("SELECT * FROM gold_roic_ledger ORDER BY timestamp ASC").df()
+    except Exception:
+        all_scenarios_df = pd.DataFrame()
 
-with col_right:
-    st.markdown(f"""
-        <div class="metric-card-dark">
-            <div class="metric-label-dark">FY2025 Combined Revenue</div>
-            <div class="metric-value-large">${simulated_revenue:,.1f}B</div>
-        </div>
-        <div class="metric-card-dark">
-            <div class="metric-label-dark">WACC Spread (9% Hurdle)</div>
-            <div class="metric-value-large">{simulated_spread:+.1f}%</div>
-        </div>
-    """, unsafe_allow_html=True)
+    if all_scenarios_df.empty:
+        st.info("📥 No historical simulations found in the registry ledger yet. Please run and commit an initial modeling scenario inside the What-If Lab tab to populate this tracking story dashboard.")
+    else:
+        latest_row = all_scenarios_df.iloc[-1]
+        current_name = latest_row["scenario_name"]
+        current_capex = latest_row["capex_billion"]
+        current_roic = latest_row["roic_percent"]
 
-b1, b2, b3, b4 = st.columns(4)
-with b1: st.markdown(f'<div class="metric-card-light"><div class="metric-label-light">Cash Capex</div><div class="metric-value-sub">${current_capex:,.1f}B</div></div>', unsafe_allow_html=True)
-with b2: st.markdown(f'<div class="metric-card-light"><div class="metric-label-light">Avg Adjusted ROIC</div><div class="metric-value-sub">{current_roic:.1f}%</div></div>', unsafe_allow_html=True)
-with b3:
-    color = "#2e7d32" if current_roic >= 9.0 else "#d32f2f"
-    st.markdown(f'<div class="metric-card-light"><div class="metric-label-light">Positive Spreads</div><div class="metric-value-sub" style="color:{color};">4 / 4</div></div>', unsafe_allow_html=True)
-with b4: st.markdown('<div class="metric-card-light"><div class="metric-label-light">Evidence Classes</div><div class="metric-value-sub">5</div></div>', unsafe_allow_html=True)
+        simulated_revenue = 1602.5 * (current_capex / 357.5)
+        simulated_spread = current_roic - 9.0
+
+        col_left, col_right = st.columns(2)
+
+        with col_left:
+            st.markdown(f"""
+                <div style="background-color: #fdfdfd; padding: 30px; border: 1px solid #f1f1f1; border-radius: 4px; margin-bottom: 20px;">
+                    <p style="font-size: 11px; color: #a0a0a0; font-weight: bold; margin-bottom: 5px;">@ ACTIVE VIEW: {current_name.upper()}</p>
+                    <h2 style="font-family: serif; font-size: 34px; font-weight: normal; color: #111111; line-height: 1.3;">
+                        The hyperscalers invested <span style="color: #2e7d32; font-weight: bold;">${current_capex:,.1f}B</span> in cash capex while sustaining an average <span style="color: #2e7d32; font-weight: bold;">{current_roic:.1f}%</span> adjusted ROIC.
+                    </h2>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(
+                x=all_scenarios_df["timestamp"], 
+                y=all_scenarios_df["roic_percent"],
+                mode='lines+markers',
+                name='Trajectory',
+                line=dict(color='#2e7d32', width=3),
+                marker=dict(size=8, color='#0d231d')
+            ))
+            
+            fig.add_shape(
+                type="line", x0=all_scenarios_df["timestamp"].min(), x1=all_scenarios_df["timestamp"].max(),
+                y0=9.0, y1=9.0, line=dict(color="#d32f2f", width=2, dash="dash")
+            )
+            
+            fig.update_layout(
+                title="Scenario Iteration Path Over Time vs 9% Hurdle Rate",
+                xaxis_title="Commit Timeline",
+                yaxis_title="Adjusted ROIC (%)",
+                template="plotly_white",
+                margin=dict(l=20, r=20, t=40, b=20)
+            )
+            # Safe layout chart call
+            st.plotly_chart(fig)
+
+        with col_right:
+            st.markdown(f"""
+                <div class="metric-card-dark">
+                    <div class="metric-label-dark">FY2025 Combined Revenue</div>
+                    <div class="metric-value-large">${simulated_revenue:,.1f}B</div>
+                </div>
+                <div class="metric-card-dark">
+                    <div class="metric-label-dark">WACC Spread (9% Hurdle)</div>
+                    <div class="metric-value-large">{simulated_spread:+.1f}%</div>
+                </div>
+            """, unsafe_allow_html=True)
+
+        b1, b2, b3, b4 = st.columns(4)
+        with b1: st.markdown(f'<div class="metric-card-light"><div class="metric-label-light">Cash Capex</div><div class="metric-value-sub">${current_capex:,.1f}B</div></div>', unsafe_allow_html=True)
+        with b2: st.markdown(f'<div class="metric-card-light"><div class="metric-label-light">Avg Adjusted ROIC</div><div class="metric-value-sub">{current_roic:.1f}%</div></div>', unsafe_allow_html=True)
+        with b3:
+            color = "#2e7d32" if current_roic >= 9.0 else "#d32f2f"
+            st.markdown(f'<div class="metric-card-light"><div class="metric-label-light">Positive Spreads</div><div class="metric-value-sub" style="color:{color};">4 / 4</div></div>', unsafe_allow_html=True)
+        with b4: st.markdown('<div class="metric-card-light"><div class="metric-label-light">Evidence Classes</div><div class="metric-value-sub">5</div></div>', unsafe_allow_html=True)
