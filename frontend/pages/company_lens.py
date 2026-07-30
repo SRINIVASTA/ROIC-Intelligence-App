@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+from data_pipeline.transform_gold import calculate_lens_metrics
+
 
 # Force clear background layout cache memory configurations on load
 st.cache_data.clear()
