@@ -40,9 +40,22 @@ else:
     # First filter down to selected entities
     filtered_df = base_company_df[base_company_df["Hyperscaler Entity"].isin(selected_companies)].copy()
     
-    # Isolate failing entities for alert metrics
-    failing_entities_master = filtered_df[filtered_df["Isolated Operating Return (%)"]  0 else "Immediate"
-                })
+    # Isolate entities currently underperforming the safety hurdle threshold
+    failing_entities_df = filtered_df[filtered_df["Isolated Operating Return (%)"] = target_hurdle:
+            years_needed = 0
+        elif growth_rate <= 0:
+            years_needed = float('inf') # Will never reach target if growth is flat or negative
+        else:
+            years_needed = (target_hurdle - current_return) / growth_rate
             
-            projection_df = pd.DataFrame(projection_records)
-            st.dataframe(projection_df, hide_index=True, use_container_width=True)
+        projection_records.append({
+            "Hyperscaler Entity": entity_name,
+            "Current Return (%)": current_return,
+            "Target Hurdle (%)": target_hurdle,
+            "Growth Rate (pp/yr)": growth_rate,
+            "Estimated Runway (Years)": round(years_needed, 1) if years_needed != float('inf') else "Non-convergent",
+            "Hurdle Status": "Passing" if years_needed == 0 else "Immediate Attention"
+        })
+    
+    projection_df = pd.DataFrame(projection_records)
+    st.dataframe(projection_df, hide_index=True, use_container_width=True)
