@@ -28,14 +28,16 @@ with st.form("scenario_form"):
     shift = st.slider("Hurdle Shift (ROIC Percentage Points)", -10.0, 15.0, 0.0, 0.5)
     
     if st.form_submit_button("Commit Transaction to Lakehouse"):
+        # Open write connection
         conn = duckdb.connect(database=DB_PATH)
         conn.execute("INSERT INTO gold_roic_ledger (scenario_name, capex_billion, roic_percent) VALUES (?, ?, ?)", 
                      (label, round(base_capex * multiplier, 1), round(base_roic + shift, 1)))
-        conn.close()
+        conn.close() # Close immediately
         st.success(f"Committed: '{label}' to Gold warehouse table!")
 
 st.subheader("📋 Historic Audit Trail")
-conn = duckdb.connect(database=DB_PATH)
+# Open in read-only mode to pull data logs safely
+conn = duckdb.connect(database=DB_PATH, read_only=True)
 log_df = conn.execute("SELECT scenario_name, capex_billion, roic_percent, timestamp FROM gold_roic_ledger ORDER BY timestamp DESC").df()
 conn.close()
 st.dataframe(log_df, use_container_width=True, hide_index=True)
