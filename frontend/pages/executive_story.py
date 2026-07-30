@@ -1,4 +1,3 @@
-import os
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
@@ -18,11 +17,9 @@ st.title("The returns behind the AI buildout")
 st.caption("A governed view of capital intensity, operating performance, and pathways to economic profit.")
 st.divider()
 
-# 1. Fetch complete data table timeline from DuckDB
 conn = st.session_state.duckdb_conn
 all_scenarios_df = conn.execute("SELECT * FROM gold_roic_ledger ORDER BY timestamp ASC").df()
 
-# Isolate latest row for the main KPI layouts
 latest_row = all_scenarios_df.iloc[-1]
 current_name = latest_row["scenario_name"]
 current_capex = latest_row["capex_billion"]
@@ -43,30 +40,24 @@ with col_left:
         </div>
     """, unsafe_allow_html=True)
     
-    # 2. PERSISTENT TIME-SERIES LINE PLOT (Charting consecutive simulation runs)
     fig = go.Figure()
-    
-    # Add historical sequence tracking trajectory path
     fig.add_trace(go.Scatter(
         x=all_scenarios_df["timestamp"], 
         y=all_scenarios_df["roic_percent"],
         mode='lines+markers',
-        name='Simulation Trajectory',
+        name='Trajectory',
         line=dict(color='#2e7d32', width=3),
-        marker=dict(size=8, color='#0d231d'),
-        hovertext=all_scenarios_df["scenario_name"]
+        marker=dict(size=8, color='#0d231d')
     ))
     
-    # Static Hurdle reference marking threshold boundary line
     fig.add_shape(
         type="line", x0=all_scenarios_df["timestamp"].min(), x1=all_scenarios_df["timestamp"].max(),
         y0=9.0, y1=9.0, line=dict(color="#d32f2f", width=2, dash="dash")
     )
     
-    # FIXED: Defined clean autoscale chart parameters without trailing argument syntax breaks
     fig.update_layout(
         title="Scenario Iteration Path Over Time vs 9% Hurdle Rate",
-        xaxis_title="Commit Timestamp Timeline",
+        xaxis_title="Commit Timeline",
         yaxis_title="Adjusted ROIC (%)",
         template="plotly_white",
         margin=dict(l=20, r=20, t=40, b=20)
