@@ -18,17 +18,13 @@ st.caption("A governed view of capital intensity, operating performance, and pat
 st.divider()
 
 if "duckdb_conn" not in st.session_state:
-    st.error("🔌 Database engine connection offline. Please initialize the application from the main core page.")
+    st.error("🔌 Database engine connection offline.")
 else:
     conn = st.session_state.duckdb_conn
-    
-    try:
-        all_scenarios_df = conn.execute("SELECT * FROM gold_roic_ledger ORDER BY timestamp ASC").df()
-    except Exception:
-        all_scenarios_df = pd.DataFrame()
+    all_scenarios_df = conn.execute("SELECT * FROM gold_roic_ledger ORDER BY timestamp ASC").df()
 
     if all_scenarios_df.empty:
-        st.info("📥 No historical simulations found in the registry ledger yet. Please run and commit an initial modeling scenario inside the What-If Lab tab to populate this tracking story dashboard.")
+        st.info("📥 No historical simulations found.")
     else:
         latest_row = all_scenarios_df.iloc[-1]
         current_name = latest_row["scenario_name"]
@@ -51,46 +47,19 @@ else:
             """, unsafe_allow_html=True)
             
             fig = go.Figure()
-            fig.add_trace(go.Scatter(
-                x=all_scenarios_df["timestamp"], 
-                y=all_scenarios_df["roic_percent"],
-                mode='lines+markers',
-                name='Trajectory',
-                line=dict(color='#2e7d32', width=3),
-                marker=dict(size=8, color='#0d231d')
-            ))
-            
-            fig.add_shape(
-                type="line", x0=all_scenarios_df["timestamp"].min(), x1=all_scenarios_df["timestamp"].max(),
-                y0=9.0, y1=9.0, line=dict(color="#d32f2f", width=2, dash="dash")
-            )
-            
-            fig.update_layout(
-                title="Scenario Iteration Path Over Time vs 9% Hurdle Rate",
-                xaxis_title="Commit Timeline",
-                yaxis_title="Adjusted ROIC (%)",
-                template="plotly_white",
-                margin=dict(l=20, r=20, t=40, b=20)
-            )
-            # Safe layout chart call
+            fig.add_trace(go.Scatter(x=all_scenarios_df["timestamp"], y=all_scenarios_df["roic_percent"], mode='lines+markers', line=dict(color='#2e7d32', width=3)))
+            fig.add_shape(type="line", x0=all_scenarios_df["timestamp"].min(), x1=all_scenarios_df["timestamp"].max(), y0=9.0, y1=9.0, line=dict(color="#d32f2f", width=2, dash="dash"))
+            fig.update_layout(template="plotly_white", margin=dict(l=20, r=20, t=40, b=20))
             st.plotly_chart(fig)
 
         with col_right:
             st.markdown(f"""
-                <div class="metric-card-dark">
-                    <div class="metric-label-dark">FY2025 Combined Revenue</div>
-                    <div class="metric-value-large">${simulated_revenue:,.1f}B</div>
-                </div>
-                <div class="metric-card-dark">
-                    <div class="metric-label-dark">WACC Spread (9% Hurdle)</div>
-                    <div class="metric-value-large">{simulated_spread:+.1f}%</div>
-                </div>
+                <div class="metric-card-dark"><div class="metric-label-dark">FY2025 Combined Revenue</div><div class="metric-value-large">${simulated_revenue:,.1f}B</div></div>
+                <div class="metric-card-dark"><div class="metric-label-dark">WACC Spread (9% Hurdle)</div><div class="metric-value-large">{simulated_spread:+.1f}%</div></div>
             """, unsafe_allow_html=True)
 
         b1, b2, b3, b4 = st.columns(4)
         with b1: st.markdown(f'<div class="metric-card-light"><div class="metric-label-light">Cash Capex</div><div class="metric-value-sub">${current_capex:,.1f}B</div></div>', unsafe_allow_html=True)
         with b2: st.markdown(f'<div class="metric-card-light"><div class="metric-label-light">Avg Adjusted ROIC</div><div class="metric-value-sub">{current_roic:.1f}%</div></div>', unsafe_allow_html=True)
-        with b3:
-            color = "#2e7d32" if current_roic >= 9.0 else "#d32f2f"
-            st.markdown(f'<div class="metric-card-light"><div class="metric-label-light">Positive Spreads</div><div class="metric-value-sub" style="color:{color};">4 / 4</div></div>', unsafe_allow_html=True)
+        with b3: st.markdown(f'<div class="metric-card-light"><div class="metric-label-light">Positive Spreads</div><div class="metric-value-sub">4 / 4</div></div>', unsafe_allow_html=True)
         with b4: st.markdown('<div class="metric-card-light"><div class="metric-label-light">Evidence Classes</div><div class="metric-value-sub">5</div></div>', unsafe_allow_html=True)
