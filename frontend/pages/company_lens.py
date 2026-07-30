@@ -6,6 +6,7 @@ st.title("🏢 Company Lens Decomposition")
 st.caption("Granular operational breakdowns extracted from primary 10-K registries with multi-year hurdle forecasting.")
 st.divider()
 
+# 1. Base Corporate Relational Dataset (Silver Layer Table)
 base_company_df = pd.DataFrame({
     "Hyperscaler Entity": ["Microsoft (Azure)", "Alphabet (GCP)", "Amazon (AWS)", "Meta Infrastructure"],
     "Allocated AI Capex ($B)": [120.5, 95.0, 82.0, 60.0],
@@ -14,6 +15,7 @@ base_company_df = pd.DataFrame({
     "Data Confidence Status": ["Verified (10-K)", "Verified (10-K)", "Calculated Estimate", "Alternative Data Source"]
 })
 
+# 2. Interactive Threshold Configuration System
 st.sidebar.header("🎯 Enterprise Hurdle Options")
 target_hurdle = st.sidebar.slider(
     "Minimum Return Safety Threshold (%)",
@@ -25,6 +27,7 @@ st.subheader("🔍 Corporate Filter Optimization Hub")
 all_companies = base_company_df["Hyperscaler Entity"].unique().tolist()
 selected_companies = st.multiselect("Isolate specific hyperscale tracking entities:", options=all_companies, default=all_companies)
 
+# Dynamic line-item filtering toggle switch
 isolate_failing = st.toggle(
     "⚠️ Isolate Deficit Entities Only", 
     value=False,
@@ -34,8 +37,10 @@ isolate_failing = st.toggle(
 if not selected_companies:
     st.warning("⚠️ Please select at least one corporate entity.")
 else:
+    # First filter down to selected entities
     filtered_df = base_company_df[base_company_df["Hyperscaler Entity"].isin(selected_companies)].copy()
-    failing_entities_df = filtered_df[filtered_df["Isolated Operating Return (%)"] = target_hurdle:
+    
+    # Mathematical slicing comparison using the less-than operator (= target_hurdle:
             years_needed = 0
         elif growth_rate <= 0:
             years_needed = float('inf') 
