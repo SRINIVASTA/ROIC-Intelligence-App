@@ -17,9 +17,15 @@ st.title("The returns behind the AI buildout")
 st.caption("A governed view of capital intensity, operating performance, and pathways to economic profit.")
 st.divider()
 
-# CRITICAL FIX: Fetch directly from the globally shared connection state
+# 1. Fetch complete data table timeline from DuckDB
 conn = st.session_state.duckdb_conn
-current_name, current_capex, current_roic, _ = conn.execute("SELECT * FROM gold_roic_ledger ORDER BY timestamp DESC LIMIT 1").fetchone()
+all_scenarios_df = conn.execute("SELECT * FROM gold_roic_ledger ORDER BY timestamp ASC").df()
+
+# Isolate latest row for the main KPI layouts
+latest_row = all_scenarios_df.iloc[-1]
+current_name = latest_row["scenario_name"]
+current_capex = latest_row["capex_billion"]
+current_roic = latest_row["roic_percent"]
 
 simulated_revenue = 1602.5 * (current_capex / 357.5)
 simulated_spread = current_roic - 9.0
@@ -36,10 +42,33 @@ with col_left:
         </div>
     """, unsafe_allow_html=True)
     
+    # 2. PERSISTENT TIME-SERIES LINE PLOT (Charting consecutive simulation runs)
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=[357.5], y=[29.7], mode='markers+text', name='Baseline', text=["Baseline"], textposition="top center", marker=dict(color='#A0A0A0', size=12)))
-    fig.add_trace(go.Scatter(x=[current_capex], y=[current_roic], mode='markers+text', name='Current', text=["Active Run"], textposition="bottom center", marker=dict(color='#0d231d', size=16, symbol='star')))
-    fig.update_layout(xaxis_title="Cash Capex ($B)", yaxis_title="Adjusted ROIC (%)", template="plotly_white", margin=dict(l=20, r=20, t=20, b=20))
+    
+    # Add historical sequence tracking trajectory path
+    fig.add_trace(go.Scatter(
+        x=all_scenarios_df["timestamp"], 
+        y=all_scenarios_df["roic_percent"],
+        mode='lines+markers',
+        name='Simulation Trajectory',
+        line=dict(color='#2e7d32', width=3),
+        marker=dict(size=8, color='#0d231d'),
+        hovertext=all_scenarios_df["scenario_name"]
+    ))
+    
+    # Static Hurdle reference marking threshold boundary line
+    fig.add_shape(
+        type="line", x0=all_scenarios_df["timestamp"].min(), x1=all_scenarios_df["timestamp"].max(),
+        y0=9.0, y1=9.0, line=dict(color="#d32f2f", width=2, dash="dash")
+    )
+    
+    fig.update_layout(
+        title="Scenario Iteration Path Over Time vs 9% Hurdle Rate",
+        xaxis_title="Commit Timestamp Timeline",
+        yaxis_title="Adjusted ROIC (%)",
+        template="plotly_white",
+        margin=dict(l=20, r=20, t=40, b=20)
+    )
     st.plotly_chart(fig, use_container_width=True)
 
 with col_right:
