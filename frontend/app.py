@@ -6,13 +6,14 @@ st.set_page_config(page_title="ROIC Intelligence Platform", layout="wide")
 
 DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "database", "lakehouse.db"))
 
-# Handle database initialization cleanly and close it immediately
-if 'initialized' not in st.session_state:
+# CRITICAL FIX: Initialize a single persistent global connection inside session state
+if 'duckdb_conn' not in st.session_state:
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    # Open once and keep it in session state
+    st.session_state.duckdb_conn = duckdb.connect(database=DB_PATH, check_same_thread=False)
     
-    # Open connection to build schema
-    conn = duckdb.connect(database=DB_PATH)
-    conn.execute("""
+    # Initialize Schema Tables
+    st.session_state.duckdb_conn.execute("""
         CREATE TABLE IF NOT EXISTS gold_roic_ledger (
             scenario_name VARCHAR,
             capex_billion DOUBLE,
@@ -21,13 +22,12 @@ if 'initialized' not in st.session_state:
         )
     """)
     # Seed baseline entry if ledger is empty
-    count = conn.execute("SELECT COUNT(*) FROM gold_roic_ledger").fetchone()[0]
+    count = st.session_state.duckdb_conn.execute("SELECT COUNT(*) FROM gold_roic_ledger").fetchone()[0]
     if count == 0:
-        conn.execute("INSERT INTO gold_roic_ledger (scenario_name, capex_billion, roic_percent) VALUES ('Morgan Stanley Baseline', 357.5, 29.7)")
-    
-    # CRITICAL FIX: Close it so pages are not locked out
-    conn.close()
-    st.session_state.initialized = True
+        st.session_state.duckdb_conn.execute("""
+            INSERT INTO gold_roic_ledger (scenario_name, capex_billion, roic_percent) 
+            VALUES ('Morgan Stanley Baseline', 357.5, 29.7)
+        """)
 
 # Define Dashboard Navigation Map
 pages = {
