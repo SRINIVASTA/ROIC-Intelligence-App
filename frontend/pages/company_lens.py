@@ -18,7 +18,7 @@ st.sidebar.header("🎯 Enterprise Hurdle Options")
 target_hurdle = st.sidebar.slider(
     "Minimum Return Safety Threshold (%)",
     min_value=15.0, max_value=35.0, value=25.0, step=0.5,
-    help="Set the minimum acceptable operating return target profile for isolated hyperscale entities."
+    help="Set the minimum acceptable operating return target profile."
 )
 
 st.subheader("🔍 Corporate Filter Optimization Hub")
@@ -35,7 +35,7 @@ if not selected_companies:
 else:
     filtered_df = base_company_df[base_company_df["Hyperscaler Entity"].isin(selected_companies)].copy()
     
-    # 3. LIVE COLUMN THRESHOLD ALERTS (Evaluating drops beneath hurdle boundary parameters)
+    # Evaluating drops beneath hurdle boundary parameters
     failing_entities = filtered_df[filtered_df["Isolated Operating Return (%)"] 
             {status_message}
         </div>
@@ -55,7 +55,7 @@ else:
     # 4. Highlighted Grid Representation
     st.subheader("📋 Segmented Corporate Dimensions Grid")
     
-    # FIXED: Rebuilt clean explicit row styling function to resolve ast parsing issues
+    # Clear styling rule to prevent ast parser conflicts
     def style_threshold_rows(row):
         is_below_hurdle = row["Isolated Operating Return (%)"] < target_hurdle
         bg_style = 'background-color: #ffcccc' if is_below_hurdle else ''
