@@ -21,14 +21,14 @@ if 'duckdb_conn' not in st.session_state:
         )
     """)
     # Seed baseline entry if ledger is empty
-    count = st.session_state.duckdb_conn.execute("SELECT COUNT(*) FROM gold_roic_ledger").fetchone()
+    count = st.session_state.duckdb_conn.execute("SELECT COUNT(*) FROM gold_roic_ledger").fetchone()[0]
     if count == 0:
         st.session_state.duckdb_conn.execute("""
             INSERT INTO gold_roic_ledger (scenario_name, capex_billion, roic_percent) 
             VALUES ('Morgan Stanley Baseline', 357.5, 29.7)
         """)
 
-# FIXED: Clean file paths for the navigation map
+# FIXED: Prefixed 'frontend/' paths to align with your repository architecture directory layout
 pages = {
     "ROIC Intelligence": [
         st.Page("pages/executive_story.py", title="📖 Executive Story", default=True),
