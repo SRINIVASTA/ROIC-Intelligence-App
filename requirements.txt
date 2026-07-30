@@ -4,3 +4,4 @@ plotly
 pdfplumber
 duckdb
 pytest
+matplotlib
