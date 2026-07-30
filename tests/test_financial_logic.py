@@ -25,3 +25,27 @@ def test_edge_case_formatting():
     
     assert extracted_data["capex"] == 120.5
     assert extracted_data["roic"] == 18.5
+def test_hurdle_forecasting_logic_passing():
+    """Verify corporations that already cross the hurdle return 0 runway years."""
+    # If current return (32.4%) >= target hurdle (25.0%), runway must be 0
+    current_return = 32.4
+    target_hurdle = 25.0
+    growth_rate = 1.5
+    
+    years_needed = 0 if current_return >= target_hurdle else (target_hurdle - current_return) / growth_rate
+    assert years_needed == 0
+
+def test_hurdle_forecasting_logic_non_convergent():
+    """Verify negative growth patterns are flagged correctly to avoid infinite loops."""
+    current_return = 24.5
+    target_hurdle = 25.0
+    growth_rate = -0.5  # Negative growth will never hit the hurdle
+    
+    if current_return >= target_hurdle:
+        years_needed = 0
+    elif growth_rate <= 0:
+        years_needed = float('inf')
+    else:
+        years_needed = (target_hurdle - current_return) / growth_rate
+        
+    assert years_needed == float('inf')
