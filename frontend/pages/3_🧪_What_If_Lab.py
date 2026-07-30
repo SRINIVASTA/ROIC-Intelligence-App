@@ -38,16 +38,20 @@ with st.form("scenario_form"):
 
 st.subheader("📋 Historic Audit Trail")
 
-# 1. Fetch current live historical dataset log records
-log_df = st.session_state.duckdb_conn.execute(
-    "SELECT scenario_name AS [Scenario Name], capex_billion AS [Capex ($B)], roic_percent AS [ROIC (%)], timestamp AS [Committed Timestamp] FROM gold_roic_ledger ORDER BY timestamp DESC"
-).df()
+# FIXED: Replaced square brackets [...] with standard database double quotes "..."
+log_df = st.session_state.duckdb_conn.execute("""
+    SELECT scenario_name AS "Scenario Name", 
+           capex_billion AS "Capex ($B)", 
+           roic_percent AS "ROIC (%)", 
+           timestamp AS "Committed Timestamp" 
+    FROM gold_roic_ledger 
+    ORDER BY timestamp DESC
+""").df()
 
-# 2. Render UI Data Table
+# Render UI Data Table
 st.dataframe(log_df, use_container_width=True, hide_index=True)
 
-# 3. SPREADSHEET DOWNLOAD ACTION BUTTON ENGINE
-# Convert data frame to standard comma-separated string format byte buffer streams
+# Spreadsheet Download Action Button Engine
 csv_data = log_df.to_csv(index=False).encode('utf-8')
 
 st.write("")
