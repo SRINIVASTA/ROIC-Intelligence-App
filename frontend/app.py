@@ -24,16 +24,16 @@ if 'duckdb_conn' not in st.session_state:
     count = st.session_state.duckdb_conn.execute("SELECT COUNT(*) FROM gold_roic_ledger").fetchone()
     if count == 0:
         st.session_state.duckdb_conn.execute("""
-            INSERT INTO gold_roic_ledger (scenario_name, capex_billion, r_percent) 
+            INSERT INTO gold_roic_ledger (scenario_name, capex_billion, roic_percent) 
             VALUES ('Morgan Stanley Baseline', 357.5, 29.7)
         """)
 
-# FIXED: Standardized alphanumeric script target links to pass Python 3.14 compilation rules
+# FIXED: Clean file paths for the navigation map
 pages = {
     "ROIC Intelligence": [
-        st.Page("pages/1_Executive_Story.py", title="📖 Executive Story", default=True),
-        st.Page("pages/2_Company_Lens.py", title="🏢 Company Lens"),
-        st.Page("pages/3_What_If_Lab.py", title="🧪 What-If Lab"),
+        st.Page("pages/executive_story.py", title="📖 Executive Story", default=True),
+        st.Page("pages/company_lens.py", title="🏢 Company Lens"),
+        st.Page("pages/what_if_lab.py", title="🧪 What-If Lab"),
     ]
 }
 
