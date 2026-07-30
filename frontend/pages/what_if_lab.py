@@ -37,28 +37,12 @@ with st.form("scenario_form"):
         st.success(f"Committed: '{label}' to Gold warehouse table!")
 
 st.subheader("📋 Historic Audit Trail")
-
 log_df = st.session_state.duckdb_conn.execute("""
-    SELECT scenario_name AS "Scenario Name", 
-           capex_billion AS "Capex ($B)", 
-           roic_percent AS "ROIC (%)", 
-           timestamp AS "Committed Timestamp" 
-    FROM gold_roic_ledger 
-    ORDER BY timestamp DESC
+    SELECT scenario_name AS "Scenario Name", capex_billion AS "Capex ($B)", roic_percent AS "ROIC (%)", timestamp AS "Committed Timestamp" FROM gold_roic_ledger ORDER BY timestamp DESC
 """).df()
 
-# Render UI Data Table
 st.dataframe(log_df, use_container_width=True, hide_index=True)
 
-# Spreadsheet Download Action Button Engine
 csv_data = log_df.to_csv(index=False).encode('utf-8')
-
 st.write("")
-st.download_button(
-    label="📥 Download Audit Ledger Spreadsheet (.CSV)",
-    data=csv_data,
-    file_name="roic_intelligence_audit_ledger.csv",
-    mime="text/csv",
-    help="Click here to instantly export this entire relational DuckDB Gold table timeline into an enterprise-ready spreadsheet layout file.",
-    use_container_width=True
-)
+st.download_button(label="📥 Download Audit Ledger Spreadsheet (.CSV)", data=csv_data, file_name="roic_ledger.csv", mime="text/csv", use_container_width=True)
