@@ -33,7 +33,7 @@ selected_companies = st.multiselect(
 if not selected_companies:
     st.warning("⚠️ Please select at least one corporate entity to render data tracking lines.")
 else:
-    filtered_df = base_company_df[base_company_df["Hyperscaler Entity"].isin(selected_companies)]
+    filtered_df = base_company_df[base_company_df["Hyperscaler Entity"].isin(selected_companies)].copy()
     
     # 3. LIVE COLUMN THRESHOLD ALERTS (Evaluating drops beneath hurdle boundary parameters)
     failing_entities = filtered_df[filtered_df["Isolated Operating Return (%)"] 
@@ -55,9 +55,11 @@ else:
     # 4. Highlighted Grid Representation
     st.subheader("📋 Segmented Corporate Dimensions Grid")
     
-    # Highlight data frames rows if they fail custom parameter targets
+    # FIXED: Rebuilt clean explicit row styling function to resolve ast parsing issues
     def style_threshold_rows(row):
-        return ['background-color: #ffcccc' if row["Isolated Operating Return (%)"] < target_hurdle else '' for _ in row]
+        is_below_hurdle = row["Isolated Operating Return (%)"] < target_hurdle
+        bg_style = 'background-color: #ffcccc' if is_below_hurdle else ''
+        return [bg_style] * len(row)
         
     styled_grid = filtered_df.style.apply(style_threshold_rows, axis=1)
     st.dataframe(styled_grid, hide_index=True, use_container_width=True)
