@@ -20,6 +20,7 @@ else:
             ORDER BY timestamp DESC LIMIT 1
         """).df()
         
+        # ✅ FIXED: Changed .iloc to .iloc[0] to prevent the compilation SyntaxError
         latest_row = latest_sim_df.iloc[0]
         active_capex = latest_row["capex_billion"]
         active_roic = latest_row["roic_percent"]
@@ -88,7 +89,7 @@ else:
         
         projection_df = pd.DataFrame(projection_records)
 
-        # INSIDE BLOCK DEFINITION: Formatter function defined safely with matching indentation
+        # Formatter function defined safely with matching indentation
         def highlight_urgency(val):
             if val == "Immediate Attention":
                 return 'background-color: #fce8e6; color: #a81c0c; font-weight: bold;'
