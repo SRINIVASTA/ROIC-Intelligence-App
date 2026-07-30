@@ -5,3 +5,4 @@ pdfplumber
 duckdb
 pytest
 matplotlib
+numpy
