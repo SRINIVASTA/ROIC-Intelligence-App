@@ -6,6 +6,7 @@ import duckdb
 import pandas as pd
 import numpy as np
 import io
+from data_pipeline.transform_gold import simulate_lab_delta
 
 st.title("🧪 Scenario Analytics Lab & Risk Simulator")
 st.caption("Perform modifications, scenario commits, or run advanced multi-variable statistical stress tests.")
