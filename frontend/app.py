@@ -4,14 +4,15 @@ import duckdb
 
 st.set_page_config(page_title="ROIC Intelligence Platform", layout="wide")
 
-DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "database", "lakehouse.db"))
+# Correct path mapping to the lakehouse database directory setup
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+DB_PATH = os.path.join(BASE_DIR, "database", "lakehouse.db")
 
-# Initialize a single persistent global connection inside session state
 if 'duckdb_conn' not in st.session_state:
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     st.session_state.duckdb_conn = duckdb.connect(database=DB_PATH)
     
-    # Initialize Schema Tables
+    # Initialize Core Gold ledger tracking schemas
     st.session_state.duckdb_conn.execute("""
         CREATE TABLE IF NOT EXISTS gold_roic_ledger (
             scenario_name VARCHAR,
@@ -20,15 +21,16 @@ if 'duckdb_conn' not in st.session_state:
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
-    # Seed baseline entry if ledger is empty
-    count = st.session_state.duckdb_conn.execute("SELECT COUNT(*) FROM gold_roic_ledger").fetchone()[0]
-    if count == 0:
+    
+    # Secure row counting validation check using index mapping rules
+    count_check = st.session_state.duckdb_conn.execute("SELECT COUNT(*) FROM gold_roic_ledger").fetchone()
+    if count_check is not None and count_check[0] == 0:
         st.session_state.duckdb_conn.execute("""
             INSERT INTO gold_roic_ledger (scenario_name, capex_billion, roic_percent) 
             VALUES ('Morgan Stanley Baseline', 357.5, 29.7)
         """)
 
-# FIXED: Prefixed 'frontend/' paths to align with your repository architecture directory layout
+# Clear multi-page page routing structure mappings
 pages = {
     "ROIC Intelligence": [
         st.Page("pages/executive_story.py", title="📖 Executive Story", default=True),
