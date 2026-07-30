@@ -18,7 +18,7 @@ st.markdown("""
     .metric-value { font-size: 36px; font-weight: bold; }
     .metric-label { font-size: 14px; opacity: 0.8; }
     </style>
-""", unsafe_allow_html=True)  # FIXED: Changed from unsafe_allowed_html
+""", unsafe_allow_html=True)
 
 st.title("The returns behind the AI buildout")
 st.caption("Illustrative Financial Modeling Application • Powered by Open-Source Python & Streamlit")
@@ -48,7 +48,7 @@ simulated_capex = base_capex * capex_multiplier
 simulated_roic = base_roic + roic_shift
 
 # 4. KPI Layout Presentation
-col1, col2 = st.columns()
+col1, col2 = st.columns(2)  # FIXED: Added the required argument '2'
 
 with col1:
     st.subheader("Hyperscaler Financial Framework")
@@ -80,8 +80,8 @@ with col1:
         title="Capex vs. Adjusted ROIC Efficiency Frontier",
         xaxis_title="Cash Capex ($ Billions)",
         yaxis_title="Adjusted ROIC (%)",
-        xaxis=dict(range=[100, 800]),  # FIXED: Explicit limits assigned 
-        yaxis=dict(range=[0, 60]),     # FIXED: Explicit limits assigned
+        xaxis=dict(range=[100, 800]), 
+        yaxis=dict(range=[0, 50]),
         template="plotly_white", 
         margin=dict(l=40, r=40, t=40, b=40)
     )
@@ -98,7 +98,7 @@ with col2:
             <div class="metric-label">ADJUSTED ROIC</div>
             <div class="metric-value">{simulated_roic:.1f}%</div>
         </div>
-    """, unsafe_allow_html=True)  # FIXED: Changed from unsafe_allowed_html
+    """, unsafe_allow_html=True)
     
     # Quick-view tabular lookup historical log
     st.subheader("📜 Scenario Version Ledger")
