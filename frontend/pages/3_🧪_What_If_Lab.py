@@ -1,10 +1,6 @@
-import os
 import streamlit as st
 import pdfplumber
 import re
-import duckdb
-
-DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "database", "lakehouse.db"))
 
 st.title("🧪 Scenario Analytics Lab")
 st.caption("Perform modifications, scenario commits, or load unstructured PDF updates.")
@@ -28,16 +24,14 @@ with st.form("scenario_form"):
     shift = st.slider("Hurdle Shift (ROIC Percentage Points)", -10.0, 15.0, 0.0, 0.5)
     
     if st.form_submit_button("Commit Transaction to Lakehouse"):
-        # Open write connection
-        conn = duckdb.connect(database=DB_PATH)
-        conn.execute("INSERT INTO gold_roic_ledger (scenario_name, capex_billion, roic_percent) VALUES (?, ?, ?)", 
-                     (label, round(base_capex * multiplier, 1), round(base_roic + shift, 1)))
-        conn.close() # Close immediately
+        # CRITICAL FIX: Execute writing transaction directly through the shared connection state
+        st.session_state.duckdb_conn.execute(
+            "INSERT INTO gold_roic_ledger (scenario_name, capex_billion, roic_percent) VALUES (?, ?, ?)", 
+            (label, round(base_capex * multiplier, 1), round(base_roic + shift, 1))
+        )
         st.success(f"Committed: '{label}' to Gold warehouse table!")
 
 st.subheader("📋 Historic Audit Trail")
-# Open in read-only mode to pull data logs safely
-conn = duckdb.connect(database=DB_PATH, read_only=True)
-log_df = conn.execute("SELECT scenario_name, capex_billion, roic_percent, timestamp FROM gold_roic_ledger ORDER BY timestamp DESC").df()
-conn.close()
+# Query directly using the shared connection state
+log_df = st.session_state.duckdb_conn.execute("SELECT scenario_name, capex_billion, roic_percent, timestamp FROM gold_roic_ledger ORDER BY timestamp DESC").df()
 st.dataframe(log_df, use_container_width=True, hide_index=True)
