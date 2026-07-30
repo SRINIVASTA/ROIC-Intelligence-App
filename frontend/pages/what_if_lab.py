@@ -1,4 +1,9 @@
 import os
+import sys
+
+# Force Python to find the root directory of your repository
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
 import streamlit as st
 import pdfplumber
 import re
@@ -6,7 +11,10 @@ import duckdb
 import pandas as pd
 import numpy as np
 import io
-from data_pipeline.transform_gold import simulate_lab_delta
+from data_pipeline.transform_gold import simulate_lab_delta, run_monte_carlo_math
+
+# Set path configuration fallback safely
+DB_PATH = "data/gold_lakehouse.db"
 
 st.title("🧪 Scenario Analytics Lab & Risk Simulator")
 st.caption("Perform modifications, scenario commits, or run advanced multi-variable statistical stress tests.")
