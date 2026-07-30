@@ -37,7 +37,7 @@ else:
             round(active_capex * 0.230, 1), 
             round(active_capex * 0.168, 1)
         ],
-        # DYNAMIC REPAIR FIX: Fixed formula numbers removed. Reads live database entries directly!
+        # Dynamic database entries instead of fixed shifts
         "Isolated Operating Return (%)": [r_msft, r_gcp, r_aws, r_meta],
         "Historical Return Growth (pp/yr)": [1.5, 0.8, 1.2, 2.1],
         "Data Confidence Status": ["Verified (10-K)", "Verified (10-K)", "Calculated Estimate", "Alternative Data Source"]
@@ -58,7 +58,7 @@ else:
         filtered_df = base_company_df[base_company_df["Hyperscaler Entity"].isin(selected_companies)].copy()
         failing_entities_df = filtered_df[filtered_df["Isolated Operating Return (%)"] < target_hurdle]
         
-        display_df = failing_entities_df if isolate_failing = True else filtered_df
+        # FIXED: Duplicated inline broken assignment statement removed entirely
         if isolate_failing:
             display_df = failing_entities_df
         else:
