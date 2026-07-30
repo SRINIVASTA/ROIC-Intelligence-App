@@ -18,7 +18,7 @@ st.markdown("""
     .metric-value { font-size: 36px; font-weight: bold; }
     .metric-label { font-size: 14px; opacity: 0.8; }
     </style>
-""", unsafe_allowed_html=True)
+""", unsafe_allow_html=True)  # FIXED: Changed from unsafe_allowed_html
 
 st.title("The returns behind the AI buildout")
 st.caption("Illustrative Financial Modeling Application • Powered by Open-Source Python & Streamlit")
@@ -48,7 +48,7 @@ simulated_capex = base_capex * capex_multiplier
 simulated_roic = base_roic + roic_shift
 
 # 4. KPI Layout Presentation
-col1, col2 = st.columns([2, 1])
+col1, col2 = st.columns()
 
 with col1:
     st.subheader("Hyperscaler Financial Framework")
@@ -59,6 +59,7 @@ with col1:
     
     # Live Interactive Visualizer Chart
     fig = go.Figure()
+    
     # Baseline Marker
     fig.add_trace(go.Scatter(
         x=[base_capex], y=[base_roic],
@@ -66,6 +67,7 @@ with col1:
         text=["Baseline"], textposition="top center",
         marker=dict(color='#A0A0A0', size=15)
     ))
+    
     # Simulated Target Marker
     fig.add_trace(go.Scatter(
         x=[simulated_capex], y=[simulated_roic],
@@ -78,8 +80,10 @@ with col1:
         title="Capex vs. Adjusted ROIC Efficiency Frontier",
         xaxis_title="Cash Capex ($ Billions)",
         yaxis_title="Adjusted ROIC (%)",
-        xaxis=dict(range=[100, 800]), yaxis=dict(range=[0, 50]),
-        template="plotly_white", margin=dict(l=40, r=40, t=40, b=40)
+        xaxis=dict(range=[100, 800]),  # FIXED: Explicit limits assigned 
+        yaxis=dict(range=[0, 60]),     # FIXED: Explicit limits assigned
+        template="plotly_white", 
+        margin=dict(l=40, r=40, t=40, b=40)
     )
     st.plotly_chart(fig, use_container_width=True)
 
@@ -94,7 +98,7 @@ with col2:
             <div class="metric-label">ADJUSTED ROIC</div>
             <div class="metric-value">{simulated_roic:.1f}%</div>
         </div>
-    """, unsafe_allowed_html=True)
+    """, unsafe_allow_html=True)  # FIXED: Changed from unsafe_allowed_html
     
     # Quick-view tabular lookup historical log
     st.subheader("📜 Scenario Version Ledger")
