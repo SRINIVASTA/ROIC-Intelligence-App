@@ -20,7 +20,7 @@ else:
             ORDER BY timestamp DESC LIMIT 1
         """).df()
         
-        # ✅ FIXED: Changed .iloc to .iloc[0] to prevent the compilation SyntaxError
+        # Explicit index extraction avoids syntax parser truncations
         latest_row = latest_sim_df.iloc[0]
         active_capex = latest_row["capex_billion"]
         active_roic = latest_row["roic_percent"]
