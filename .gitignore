@@ -1,0 +1,12 @@
+# Databases and State Files
+*.db
+*.db.wal
+.streamlit/
+
+# Python Runtime Cache
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+.DS_Store
