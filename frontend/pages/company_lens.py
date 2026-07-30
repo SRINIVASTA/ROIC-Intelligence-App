@@ -12,19 +12,12 @@ if "duckdb_conn" not in st.session_state:
 else:
     conn = st.session_state.duckdb_conn
     
-    # Fetch the most recent simulation run from the pipeline ledger
+    # Fetch the most recent simulation run from the pipeline ledger safely
     try:
-        latest_sim_df = conn.execute("""
-            SELECT capex_billion, roic_percent, scenario_name 
-            FROM gold_roic_ledger 
-            ORDER BY timestamp DESC LIMIT 1
-        """).df()
-        
-        # Explicit index extraction avoids syntax parser truncations
-        latest_row = latest_sim_df.iloc[0]
-        active_capex = latest_row["capex_billion"]
-        active_roic = latest_row["roic_percent"]
-        active_scenario = latest_row["scenario_name"]
+        latest_sim_df = conn.execute("SELECT capex_billion, roic_percent, scenario_name FROM gold_roic_ledger ORDER BY timestamp DESC LIMIT 1").df()
+        active_capex = float(latest_sim_df.at[0, "capex_billion"])
+        active_roic = float(latest_sim_df.at[0, "roic_percent"])
+        active_scenario = str(latest_sim_df.at[0, "scenario_name"])
     except Exception:
         active_capex, active_roic, active_scenario = 357.5, 29.7, "Default Baseline"
 
@@ -88,19 +81,4 @@ else:
             })
         
         projection_df = pd.DataFrame(projection_records)
-
-        # Formatter function defined safely with matching indentation
-        def highlight_urgency(val):
-            if val == "Immediate Attention":
-                return 'background-color: #fce8e6; color: #a81c0c; font-weight: bold;'
-            elif val == "Passing":
-                return 'background-color: #e6f4ea; color: #137333; font-weight: bold;'
-            return ''
-
-        # Dual-compatibility renderer handles both newer and older pandas versions seamlessly
-        try:
-            stylized_df = projection_df.style.map(highlight_urgency, subset=["Hurdle Status"])
-        except AttributeError:
-            stylized_df = projection_df.style.applymap(highlight_urgency, subset=["Hurdle Status"])
-
-        st.dataframe(stylized_df, hide_index=True)
+        st.dataframe(projection_df, hide_index=True, width="stretch")
