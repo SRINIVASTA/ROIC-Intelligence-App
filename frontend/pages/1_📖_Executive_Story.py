@@ -21,8 +21,8 @@ st.title("The returns behind the AI buildout")
 st.caption("A governed view of capital intensity, operating performance, and pathways to economic profit.")
 st.divider()
 
-# Query latest metric state from local lakehouse data store
-conn = duckdb.connect(database=DB_PATH)
+# CRITICAL FIX: Open the connection in read_only mode to bypass IO locks
+conn = duckdb.connect(database=DB_PATH, read_only=True)
 current_name, current_capex, current_roic, _ = conn.execute("SELECT * FROM gold_roic_ledger ORDER BY timestamp DESC LIMIT 1").fetchone()
 conn.close()
 
