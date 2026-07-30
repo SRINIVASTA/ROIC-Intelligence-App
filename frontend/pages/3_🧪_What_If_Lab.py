@@ -38,7 +38,6 @@ with st.form("scenario_form"):
 
 st.subheader("📋 Historic Audit Trail")
 
-# FIXED: Replaced square brackets [...] with standard database double quotes "..."
 log_df = st.session_state.duckdb_conn.execute("""
     SELECT scenario_name AS "Scenario Name", 
            capex_billion AS "Capex ($B)", 
