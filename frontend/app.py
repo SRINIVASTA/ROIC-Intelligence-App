@@ -6,11 +6,12 @@ st.set_page_config(page_title="ROIC Intelligence Platform", layout="wide")
 
 DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "database", "lakehouse.db"))
 
-# CRITICAL FIX: Initialize a single persistent global connection inside session state
+# Initialize a single persistent global connection inside session state
 if 'duckdb_conn' not in st.session_state:
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-    # Open once and keep it in session state
-    st.session_state.duckdb_conn = duckdb.connect(database=DB_PATH, check_same_thread=False)
+    
+    # FIXED: DuckDB connect without the sqlite3-specific parameter
+    st.session_state.duckdb_conn = duckdb.connect(database=DB_PATH)
     
     # Initialize Schema Tables
     st.session_state.duckdb_conn.execute("""
