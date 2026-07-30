@@ -1,10 +1,6 @@
-import os
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
-import duckdb
-
-DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "database", "lakehouse.db"))
 
 st.markdown("""
     <style>
@@ -21,10 +17,9 @@ st.title("The returns behind the AI buildout")
 st.caption("A governed view of capital intensity, operating performance, and pathways to economic profit.")
 st.divider()
 
-# CRITICAL FIX: Open the connection in read_only mode to bypass IO locks
-conn = duckdb.connect(database=DB_PATH, read_only=True)
+# CRITICAL FIX: Fetch directly from the globally shared connection state
+conn = st.session_state.duckdb_conn
 current_name, current_capex, current_roic, _ = conn.execute("SELECT * FROM gold_roic_ledger ORDER BY timestamp DESC LIMIT 1").fetchone()
-conn.close()
 
 simulated_revenue = 1602.5 * (current_capex / 357.5)
 simulated_spread = current_roic - 9.0
