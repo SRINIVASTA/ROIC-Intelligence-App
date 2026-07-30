@@ -9,8 +9,6 @@ DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "databas
 # Initialize a single persistent global connection inside session state
 if 'duckdb_conn' not in st.session_state:
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-    
-    # FIXED: DuckDB connect without the sqlite3-specific parameter
     st.session_state.duckdb_conn = duckdb.connect(database=DB_PATH)
     
     # Initialize Schema Tables
@@ -23,19 +21,19 @@ if 'duckdb_conn' not in st.session_state:
         )
     """)
     # Seed baseline entry if ledger is empty
-    count = st.session_state.duckdb_conn.execute("SELECT COUNT(*) FROM gold_roic_ledger").fetchone()[0]
+    count = st.session_state.duckdb_conn.execute("SELECT COUNT(*) FROM gold_roic_ledger").fetchone()
     if count == 0:
         st.session_state.duckdb_conn.execute("""
-            INSERT INTO gold_roic_ledger (scenario_name, capex_billion, roic_percent) 
+            INSERT INTO gold_roic_ledger (scenario_name, capex_billion, r_percent) 
             VALUES ('Morgan Stanley Baseline', 357.5, 29.7)
         """)
 
-# Define Dashboard Navigation Map
+# FIXED: Standardized alphanumeric script target links to pass Python 3.14 compilation rules
 pages = {
     "ROIC Intelligence": [
-        st.Page("pages/1_📖_Executive_Story.py", title="📖 Executive Story", default=True),
-        st.Page("pages/2_🏢_Company_Lens.py", title="🏢 Company Lens"),
-        st.Page("pages/3_🧪_What_If_Lab.py", title="🧪 What-If Lab"),
+        st.Page("pages/1_Executive_Story.py", title="📖 Executive Story", default=True),
+        st.Page("pages/2_Company_Lens.py", title="🏢 Company Lens"),
+        st.Page("pages/3_What_If_Lab.py", title="🧪 What-If Lab"),
     ]
 }
 
