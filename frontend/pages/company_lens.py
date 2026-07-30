@@ -41,38 +41,7 @@ else:
     filtered_df = base_company_df[base_company_df["Hyperscaler Entity"].isin(selected_companies)].copy()
     
     # Isolate failing entities for alert metrics
-    failing_entities_master = filtered_df[filtered_df["Isolated Operating Return (%)"] < target_hurdle]
-    
-    # Apply the toggle filter if switched on
-    if isolate_failing:
-        filtered_df = filtered_df[filtered_df["Isolated Operating Return (%)"] < target_hurdle]
-
-    # Dynamic Notification Canvas based on threshold safety status
-    if not failing_entities_master.empty:
-        alert_bg, alert_border, alert_text = "#fde8e8", "#f8b4b4", "#9b1c1c"
-        status_message = f"🚨 ALERT: {len(failing_entities_master)} profiles dropped beneath your active {target_hurdle}% threshold!"
-    else:
-        alert_bg, alert_border, alert_text = "#edfafa", "#b2f5ea", "#005c53"
-        status_message = "✅ STABLE: All isolated enterprise data entities clear active return performance hurdles."
-
-    st.markdown(f'<div style="background-color: {alert_bg}; border: 1px solid {alert_border}; color: {alert_text}; padding: 16px; border-radius: 4px; font-weight: bold; margin-bottom: 20px;">{status_message}</div>', unsafe_allow_html=True)
-    
-    c1, c2, c3 = st.columns(3)
-    with c1: st.metric(label="AGGREGATE SELECTED CAPEX", value=f"${filtered_df['Allocated AI Capex ($B)'].sum():,.1f}B")
-    with c2: st.metric(label="MAX ISOLATED OPERATING RETURN", value=f"{filtered_df['Isolated Operating Return (%)'].max():.1f}%" if not filtered_df.empty else "0.0%")
-    with c3: st.metric(label="FAILING SYSTEM NODES", value=f"{len(failing_entities_master)} / {len(all_companies)}")
-        
-    st.write("")
-    
-    if filtered_df.empty:
-        st.info("ℹ️ No entities match the active deficit filter criteria.")
-    else:
-        st.subheader("📋 Segmented Corporate Dimensions Grid")
-        
-        # FIXED: Injected Status flags instead of using experimental inline lambda styles
-        # This keeps the code 100% ANSI python syntax compliant for strict interpreters
-        filtered_df["Hurdle Compliance"] = filtered_df.apply(
-            lambda r: "🚨 Deficit" if r["Isolated Operating Return (%)"]  0 else "Immediate"
+    failing_entities_master = filtered_df[filtered_df["Isolated Operating Return (%)"]  0 else "Immediate"
                 })
             
             projection_df = pd.DataFrame(projection_records)
