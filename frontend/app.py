@@ -51,3 +51,50 @@ pages = {
 
 pg = st.navigation(pages)
 pg.run()
+
+# High-visibility fixed footer with professional contact links
+st.markdown(
+    """
+    <style>
+    .footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: #262730; /* Matches your secondary background */
+        color: #FAFAFA;            /* Matches your theme text color */
+        text-align: center;
+        font-size: 13px;
+        padding: 12px 0;
+        z-index: 999999;           /* Forces footer to stay on top of everything */
+        border-top: 1px solid #FF4B4B; /* Adds a thin red line accent */
+    }
+    .footer a {
+        color: #FF4B4B;            /* Uses your primary theme red color for links */
+        text-decoration: none;
+        margin: 0 10px;
+        font-weight: bold;
+    }
+    .footer a:hover {
+        text-decoration: underline;
+        color: #FAFAFA;            /* Turns white when hovered */
+    }
+    .footer-separator {
+        color: #666;
+        margin: 0 5px;
+    }
+    /* Adds padding to the bottom of the page container so content isn't blocked */
+    .main .block-container {
+        padding-bottom: 70px;
+    }
+    </style>
+    <div class="footer">
+        <span><strong>© 2026 T A Srinivas.</strong> All Rights Reserved. Strictly for portfolio viewing purposes.</span>
+        <span class="footer-separator">|</span>
+        <a href="https://www.linkedin.com/in/srinivas-t-a-557637119/" target="_blank">LinkedIn Profile</a>
+        <span class="footer-separator">|</span>
+        <a href="mailto:tasrinivass@gmail.com">Contact Me</a>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
