@@ -2,6 +2,42 @@ import os
 import streamlit as st
 import duckdb
 
+# --- FORCE STREAMLIT TO HIDE CHROME, HEADERS, AND FOOTERS ---
+st.markdown("""
+    <style>
+    /* 1. Hide the entire top header toolbar (Deploy, Share, Options menu) */
+    [data-testid="stHeader"], header {
+        display: none !important;
+        visibility: hidden !important;
+    }
+    
+    /* 2. Hide the running status loading elements */
+    [data-testid="stStatusWidget"] {
+        display: none !important;
+        visibility: hidden !important;
+    }
+    
+    /* 3. Hide GitHub connection buttons or fork badges */
+    .viewerBadge_container__17w1a, #GithubIcon, .styles_viewerBadge__1yB5_ {
+        display: none !important;
+        visibility: hidden !important;
+    }
+    
+    /* 4. Hide the native main menu hamburger icon */
+    #MainMenu {
+        visibility: hidden !important;
+        display: none !important;
+    }
+
+    /* 5. Hide the default Streamlit footer */
+    footer {
+        visibility: hidden !important;
+        display: none !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+
 st.set_page_config(page_title="ROIC Intelligence Platform", layout="wide")
 
 # Determine base execution directory setups cleanly
